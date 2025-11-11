@@ -1,0 +1,22 @@
+# Root
+.DS_Store
+.env
+*.log
+node_modules/
+
+# Client
+client/node_modules/
+client/build/
+client/.env
+client/.cache/
+client/coverage/
+
+# Server
+server/node_modules/
+server/.env
+server/coverage/
+
+# IDE/OS
+.vscode/
+.idea/
+Thumbs.db
