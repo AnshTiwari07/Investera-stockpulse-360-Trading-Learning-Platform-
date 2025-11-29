@@ -32,16 +32,33 @@ export const AuthProvider = ({ children }) => {
     // eslint-disable-next-line
   }, [token]);
 
-  const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
-    localStorage.setItem('token', res.data.token);
-    setToken(res.data.token);
+  const login = async (email, password, options = {}) => {
+    // options can include { termsAccepted: boolean, remember: boolean }
+    const payload = { email, password, ...options };
+    const res = await api.post('/auth/login', payload);
+    if (res.data?.token) {
+      localStorage.setItem('token', res.data.token);
+      setToken(res.data.token);
+    }
+    return res;
   };
 
   const register = async (payload) => {
-    const res = await api.post('/auth/register', payload);
-    localStorage.setItem('token', res.data.token);
-    setToken(res.data.token);
+    // If payload is FormData (with file), set proper headers
+    let config = {};
+    if (payload instanceof FormData) {
+      config = { headers: { 'Content-Type': 'multipart/form-data' } };
+    }
+    const res = await api.post('/auth/register', payload, config);
+    if (res.data?.token) {
+      localStorage.setItem('token', res.data.token);
+      setToken(res.data.token);
+    }
+  };
+
+  const resendVerification = async (email) => {
+    const res = await api.post('/auth/resend', { email });
+    return res.data;
   };
 
   const logout = () => {
@@ -51,7 +68,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, loading, isAuthenticated, login, register, logout }}>
+    <AuthContext.Provider value={{ token, user, loading, isAuthenticated, login, register, logout, resendVerification }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,0 +1,117 @@
+/* Global Theme and Animations */
+:root {
+  --bg-gradient: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+  --accent: #4caf50;
+  --accent2: #03a9f4;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-gradient);
+  color: #f4f6f8;
+  background-attachment: fixed;
+}
+
+.page-fade {
+  animation: fadeInUp 500ms ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hover-raise {
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+.hover-raise:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.nav-logo {
+  /* Match the brand logo used on the login page for consistent appearance */
+  width: 84px;
+  height: 84px;
+  display: inline-block;
+  margin-right: 10px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  overflow: hidden;
+  flex: 0 0 auto;
+  transition: transform 200ms ease, box-shadow 180ms ease;
+}
+.nav-logo img.brand-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.nav-logo:hover {
+  transform: scale(1.06);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 720px) {
+  .nav-logo { width: 56px; height: 56px; }
+}
+
+.nav-link {
+  position: relative;
+  transition: transform 150ms ease, color 150ms ease;
+}
+.nav-link:hover {
+  transform: translateY(-1px);
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 4px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms ease;
+}
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.08);
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -40%; right: 0; bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shimmerMove 1200ms infinite;
+}
+@keyframes shimmerMove {
+  from { left: -40%; }
+  to { left: 120%; }
+}
+
+.overlay-fade {
+  animation: overlayFade 250ms ease-out;
+}
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.card-scale-in {
+  animation: scaleIn 200ms ease-out;
+}
+@keyframes scaleIn {
+  from { transform: scale(0.98); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

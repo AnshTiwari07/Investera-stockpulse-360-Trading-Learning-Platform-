@@ -32,6 +32,7 @@ router.get('/', auth, async (req, res) => {
     portfolio.currentValue = Number(currentValue.toFixed(2));
     portfolio.overallProfitLoss = Number((currentValue - totalInvestment).toFixed(2));
     portfolio.overallProfitLossPercentage = totalInvestment > 0 ? Number((((currentValue - totalInvestment) / totalInvestment) * 100).toFixed(2)) : 0;
+    // realizedProfitLoss is cumulative and updated on sell operations; keep as-is
     await portfolio.save();
 
     res.json(portfolio);

@@ -16,6 +16,10 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Serve uploaded files
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/stocks', stockRoutes);
@@ -23,13 +27,13 @@ app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/orders', orderRoutes);
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/zerodha-clone')
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/investara-clone')
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
 // Default route
 app.get('/', (req, res) => {
-  res.send('Zerodha Clone API is running');
+  res.send('Investara Clone API is running');
 });
 
 // Start server

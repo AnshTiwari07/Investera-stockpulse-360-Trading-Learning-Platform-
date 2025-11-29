@@ -29,31 +29,31 @@ const Portfolio = () => {
     fetchPortfolio();
   }, []);
 
-  if (!portfolio) return <CircularProgress />;
+  if (!portfolio) return <div className="shimmer" style={{ height: 40, width: 140, borderRadius: 8 }} />;
 
   return (
     <Container maxWidth="lg">
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'common.white' }}>
         My Portfolio
       </Typography>
-      <Typography variant="h6" gutterBottom>Balance: ₹ {portfolio.balance ?? '—'}</Typography>
+      <Typography variant="h6" gutterBottom sx={{ color: 'common.white' }}>Balance: ₹ {portfolio.balance ?? '—'}</Typography>
       
-      <TableContainer component={Paper} sx={{ mt: 3 }}>
-        <Table>
+      <TableContainer component={Paper} className="card-scale-in" sx={{ mt: 3, boxShadow: '0 10px 24px rgba(0,0,0,0.25)', backgroundColor: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(8px)' }}>
+        <Table sx={{ '& td': { color: 'common.white' } }}>
           <TableHead>
-            <TableRow>
-              <TableCell>Symbol</TableCell>
-              <TableCell>Qty</TableCell>
-              <TableCell>Avg Price</TableCell>
-              <TableCell>Invested</TableCell>
-              <TableCell>Current</TableCell>
-              <TableCell>P/L</TableCell>
-              <TableCell>P/L %</TableCell>
+            <TableRow sx={{ '& th': { fontWeight: 600 } }}>
+              <TableCell sx={{ color: 'common.white' }}>Symbol</TableCell>
+              <TableCell sx={{ color: 'common.white' }}>Qty</TableCell>
+              <TableCell sx={{ color: 'common.white' }}>Avg Price</TableCell>
+              <TableCell sx={{ color: 'common.white' }}>Invested</TableCell>
+              <TableCell sx={{ color: 'common.white' }}>Current</TableCell>
+              <TableCell sx={{ color: 'common.white' }}>P/L</TableCell>
+              <TableCell sx={{ color: 'common.white' }}>P/L %</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {portfolio.holdings.map((h) => (
-              <TableRow key={h.symbol} hover>
+              <TableRow key={h.symbol} hover className="hover-raise">
                 <TableCell>{h.symbol}</TableCell>
                 <TableCell>{h.quantity}</TableCell>
                 <TableCell>₹ {h.averageBuyPrice}</TableCell>
@@ -67,10 +67,11 @@ const Portfolio = () => {
         </Table>
       </TableContainer>
 
-      <Paper sx={{ p: 2, mt: 3 }}>
-        <Typography>Total Invested: ₹ {portfolio.totalInvestment}</Typography>
-        <Typography>Current Value: ₹ {portfolio.currentValue}</Typography>
-        <Typography>Overall P/L: <Box component="span" sx={{ color: portfolio.overallProfitLoss >= 0 ? 'success.main' : 'error.main' }}>₹ {portfolio.overallProfitLoss} ({portfolio.overallProfitLossPercentage}%)</Box></Typography>
+      <Paper className="card-scale-in" sx={{ p: 2, mt: 3, boxShadow: '0 10px 24px rgba(0,0,0,0.25)', backgroundColor: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(8px)' }}>
+        <Typography sx={{ color: 'common.white' }}>Total Invested: ₹ {portfolio.totalInvestment}</Typography>
+        <Typography sx={{ color: 'common.white' }}>Current Value: ₹ {portfolio.currentValue}</Typography>
+        <Typography sx={{ color: 'common.white' }}>Overall P/L: <Box component="span" sx={{ color: portfolio.overallProfitLoss >= 0 ? 'success.main' : 'error.main' }}>₹ {portfolio.overallProfitLoss} ({portfolio.overallProfitLossPercentage}%)</Box></Typography>
+        <Typography sx={{ mt: 1, color: 'common.white' }}>Realized P/L: <Box component="span" sx={{ color: (portfolio.realizedProfitLoss || 0) >= 0 ? 'success.main' : 'error.main' }}>₹ {portfolio.realizedProfitLoss ?? 0}</Box></Typography>
       </Paper>
     </Container>
   );

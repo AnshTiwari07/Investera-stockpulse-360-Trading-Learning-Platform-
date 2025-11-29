@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import api from '../api';
 import axios from 'axios';
 import StockChart from '../components/StockChart';
+import LiveChart from '../components/LiveChart';
 
 const imageMap = {
   'reliance.png': require('../images/reliance.png'),
@@ -10,7 +11,7 @@ const imageMap = {
   'infosys.png': require('../images/infosys.png'),
   'hdfc.png': require('../images/hdfc.png'),
   'sbi.png': require('../images/sbi.png'),
-  'zerodha.png': require('../images/zerodha.png'),
+  'investara.png': require('../images/investara.png'),
 };
 
 const StockDetail = () => {
@@ -20,6 +21,9 @@ const StockDetail = () => {
   const [message, setMessage] = useState(null);
   const [history, setHistory] = useState([]);
   const [showChart, setShowChart] = useState(false);
+  const [showSplash, setShowSplash] = useState(false);
+  const [splashText, setSplashText] = useState('');
+  const [liveData, setLiveData] = useState([]);
 
   const fetchStock = async () => {
     try {
@@ -44,21 +48,62 @@ const StockDetail = () => {
     fetchHistory();
   }, [symbol]);
 
+  // Live per-second price simulation and chart updates
+  useEffect(() => {
+    if (!stock) return;
+    const interval = setInterval(() => {
+      setStock((prev) => {
+        if (!prev) return prev;
+        const volatility = 0.003; // ~0.3% per second max swing
+        const delta = (Math.random() - 0.5) * (prev.currentPrice * volatility);
+        const newPrice = Math.max(0.1, Number((prev.currentPrice + delta).toFixed(2)));
+        const change = Number((newPrice - (prev.previousClose || newPrice)).toFixed(2));
+        const changePercent = prev.previousClose ? Number(((change / prev.previousClose) * 100).toFixed(2)) : 0;
+        // Append live point
+        setLiveData((ld) => {
+          const next = [...ld, { time: Date.now(), price: newPrice }];
+          return next.length > 300 ? next.slice(-300) : next;
+        });
+        return { ...prev, currentPrice: newPrice, change, changePercent };
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [stock]);
+
   const placeOrder = async (orderType) => {
     try {
       const res = await api.post('/orders/place', { symbol, quantity, orderType });
       setMessage(res.data.msg);
+      // Show 3-second splash message
+      if (orderType === 'BUY') {
+        setSplashText(`Congratulations for buying "${stock?.name || symbol}"`);
+      } else if (orderType === 'SELL') {
+        setSplashText('THANKS');
+      } else {
+        setSplashText('Order placed');
+      }
+      setShowSplash(true);
+      setTimeout(() => setShowSplash(false), 3000);
     } catch (err) {
       setMessage('Order failed');
     }
   };
 
   if (!stock) return <div className="loading">Loading stock...</div>;
+  // Resolve logo source with safe fallback
+  const logoSrc = imageMap[(stock.logo || 'investara.png').toLowerCase()] || imageMap['investara.png'];
 
   return (
     <section className="container" style={{ padding: '2rem 0' }}>
+      {showSplash && (
+        <div className="overlay-fade" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1300 }}>
+          <div className="card-scale-in" style={{ background: '#fff', color: '#111', padding: '2rem 3rem', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
+            <h2 style={{ margin: 0, fontSize: '1.75rem', textAlign: 'center' }}>{splashText}</h2>
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <img src={imageMap[stock.logo]} alt={`${stock.name} logo`} style={{ width: '100px', height: '100px', marginRight: '2rem' }} />
+        <img src={logoSrc} alt={`${stock.name} logo`} style={{ width: '100px', height: '100px', marginRight: '2rem' }} onError={(e) => { e.currentTarget.src = imageMap['investara.png']; }} />
         <div>
           <h1>{stock.name} ({stock.symbol})</h1>
           <p>Price: ₹ {stock.currentPrice}</p>
@@ -71,10 +116,19 @@ const StockDetail = () => {
         <button className="btn btn-light" onClick={() => setShowChart(!showChart)}>
           {showChart ? 'Hide Chart' : 'View Chart'}
         </button>
-        {showChart && history && history.length > 0 && <StockChart data={history} />}
+        {showChart && history && history.length > 0 && (
+          <div style={{ marginTop: '1rem' }}>
+            <StockChart data={history} />
+          </div>
+        )}
+        {showChart && (
+          <div style={{ marginTop: '1rem' }}>
+            <LiveChart data={liveData} />
+          </div>
+        )}
       </div>
 
-      <div style={{ marginTop: '2rem' }}>
+      <div style={{ marginTop: '2rem', color: 'white' }}>
         <h2>Company Information</h2>
         <p>
           {stock.name}, a prominent player in the {stock.sector} sector, is led by {stock.owner}. 

@@ -1,0 +1,90 @@
+.form-container {
+  max-width: 760px;
+  margin: 36px auto;
+  padding: 24px;
+  background: rgba(10,12,15,0.45);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(2,6,12,0.6);
+  color: var(--fg, #eef2f3);
+}
+
+.form-container h1 {
+  margin: 0 0 18px 0;
+  font-size: 1.4rem;
+  letter-spacing: 0.2px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.grid.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.95rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="file"],
+button.btn,
+textarea {
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: inherit;
+  padding: 10px 12px;
+  border-radius: 8px;
+  outline: none;
+  transition: box-shadow 150ms ease, transform 100ms ease;
+}
+
+input:focus, textarea:focus {
+  box-shadow: 0 6px 18px rgba(3,169,244,0.12);
+  border-color: var(--accent2, #03a9f4);
+}
+
+.form-text {
+  font-size: 0.85rem;
+  color: #ffdede;
+}
+
+fieldset {
+  border: 1px solid rgba(255,255,255,0.04);
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+legend {
+  padding: 0 6px;
+  font-size: 0.9rem;
+}
+
+.btn.btn-primary {
+  background: linear-gradient(90deg,var(--accent),var(--accent2));
+  color: #042028;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn[disabled] { opacity: 0.6; cursor: default; }
+
+.form img { border-radius: 8px; }
+
+@media (max-width: 720px) {
+  .grid.two { grid-template-columns: 1fr; }
+  .form-container { margin: 18px; padding: 16px; }
+}

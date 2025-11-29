@@ -71,6 +71,9 @@ router.post('/place', auth, async (req, res) => {
       }
 
       const h = portfolio.holdings[holdingIndex];
+      // Realized profit/loss from this sell
+      const realized = Number(((executionPrice - h.averageBuyPrice) * q).toFixed(2));
+      portfolio.realizedProfitLoss = Number(((portfolio.realizedProfitLoss || 0) + realized).toFixed(2));
       h.quantity -= q;
       user.balance = Number((user.balance + totalAmount).toFixed(2));
 

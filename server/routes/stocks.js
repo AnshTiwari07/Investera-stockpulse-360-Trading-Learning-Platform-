@@ -3,8 +3,8 @@ const router = express.Router();
 const Stock = require('../models/Stock');
 const auth = require('../middleware/auth');
 
-// GET /api/stocks - list all stocks
-router.get('/', auth, async (req, res) => {
+// GET /api/stocks - list all stocks (public)
+router.get('/', async (req, res) => {
   try {
     const stocks = await Stock.find({}).sort({ symbol: 1 });
     res.json(stocks);
@@ -14,8 +14,8 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// GET /api/stocks/:symbol - get stock by symbol
-router.get('/:symbol', auth, async (req, res) => {
+// GET /api/stocks/:symbol - get stock by symbol (public)
+router.get('/:symbol', async (req, res) => {
   try {
     const stock = await Stock.findOne({ symbol: req.params.symbol.toUpperCase() });
     if (!stock) return res.status(404).json({ msg: 'Stock not found' });
@@ -88,7 +88,7 @@ router.post('/seed', async (req, res) => {
       s.change = change;
       s.changePercent = Number(((change / s.previousClose) * 100).toFixed(2));
       // Ensure every seeded stock has a logo; fall back to a generic placeholder
-      if (!s.logo) s.logo = 'zerodha.png';
+      if (!s.logo) s.logo = 'investara.png';
     }
 
     await Stock.bulkWrite(

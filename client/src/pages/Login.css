@@ -1,0 +1,89 @@
+:root {
+  --bg: #0f1720;
+  --card-bg: rgba(255,255,255,0.04);
+  --text: #eaf2f3;
+  --muted: rgba(234,242,243,0.7);
+  --accent: #4caf50;
+  --accent-2: #03a9f4;
+  --glass: rgba(255,255,255,0.03);
+}
+
+[data-theme='light'] {
+  --bg: #f6f8fa;
+  --card-bg: #ffffff;
+  --text: #0b1220;
+  --muted: rgba(11,18,32,0.6);
+  --accent: #1e88e5;
+  --accent-2: #43a047;
+  --glass: rgba(0,0,0,0.03);
+}
+
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: linear-gradient(180deg, rgba(2,6,10,0.6), rgba(2,6,10,0.9)), var(--bg);
+}
+
+.login-card {
+  width: 900px;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: 40% 60%;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 16px 50px rgba(2,6,12,0.6);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  transition: transform 240ms ease, box-shadow 240ms ease;
+}
+.login-card:hover { transform: translateY(-6px); }
+
+.login-brand {
+  padding: 28px;
+  background: linear-gradient(180deg, rgba(3,19,30,0.6), rgba(6,28,40,0.6));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  color: var(--text);
+}
+.brand-logo { width: 84px; height: 84px; border-radius: 12px; background: linear-gradient(90deg,var(--accent),var(--accent-2)); display:flex; align-items:center; justify-content:center; font-weight:700; color:#042028; font-size:22px; }
+.brand-title { font-size: 1.25rem; font-weight:700; margin-top:6px; }
+.brand-sub { color: var(--muted); font-size:0.95rem; text-align:center; max-width:200px }
+
+.login-form {
+  padding: 28px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  background: var(--card-bg);
+}
+
+.login-form h2 { margin:0; color:var(--text); font-size:1.1rem }
+.login-fields { display:flex; flex-direction:column; gap:12px; margin-top:6px }
+
+.form-actions { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-top:6px }
+.remember { color:var(--muted); }
+
+.submit-btn { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:#042028; border:none; padding:10px 14px; border-radius:10px; font-weight:600; cursor:pointer; transition: transform 150ms ease, box-shadow 150ms ease; }
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(3,169,244,0.08); }
+
+.social-row { display:flex; gap:10px; justify-content:center; margin-top:6px }
+.social-btn { padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:var(--text); display:flex; align-items:center; gap:8px; cursor:pointer }
+.social-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+
+/* inputs handled by MUI; add small consistent spacing */
+.login-form .MuiTextField-root { background: var(--glass); border-radius:8px; }
+
+/* responsive */
+@media (max-width: 880px) {
+  .login-card { grid-template-columns: 1fr; }
+  .login-brand { padding: 20px; }
+  .login-form { padding: 20px; }
+}
+
+/* focus ring for accessibility */
+.MuiInputBase-root:focus-within { box-shadow: 0 8px 20px rgba(3,169,244,0.08); border-radius:8px }
