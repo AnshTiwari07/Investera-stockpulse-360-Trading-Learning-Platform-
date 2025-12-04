@@ -6,6 +6,8 @@ const authRoutes = require('./routes/auth');
 const stockRoutes = require('./routes/stocks');
 const portfolioRoutes = require('./routes/portfolio');
 const orderRoutes = require('./routes/orders');
+const transactionRoutes = require('./routes/transactions');
+const streamRoutes = require('./routes/stream');
 
 // Load environment variables
 dotenv.config();
@@ -25,6 +27,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/stocks', stockRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/stream', streamRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/investara-clone')

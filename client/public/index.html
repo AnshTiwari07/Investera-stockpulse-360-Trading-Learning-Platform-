@@ -4,13 +4,24 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <!-- Favicon (uses public/image.png if provided) -->
-    <link rel="icon" href="%PUBLIC_URL%/image.png" />
-    <meta property="og:image" content="%PUBLIC_URL%/image.png" />
+    <!-- Favicon and Open Graph image -->
+    <!-- Removed legacy logo-invest references to avoid 404/aborted requests -->
     <title>Investara Trading Dashboard</title>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>
+      <style>
+        .nojs-hero { max-width: 1200px; margin: 12px auto; border-radius: 16px; overflow: hidden; }
+        .nojs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px; }
+        .nojs-grid img { width: 100%; height: 160px; object-fit: cover; background: #fff; }
+        .nojs-title { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji','Segoe UI Emoji'; font-weight: 700; padding: 8px 0; text-align: center; }
+      </style>
+      <div class="nojs-hero" aria-label="Market overview image gallery">
+        <div class="nojs-title">Today’s Market Pulse</div>
+        <div class="nojs-grid"></div>
+      </div>
+      You need to enable JavaScript to run the full interactive app.
+    </noscript>
     <div id="root"></div>
   </body>
 </html>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4caf50;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#03a9f4;stop-opacity:0.8" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f44336;stop-opacity:0.7" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:0.7" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="300" fill="#FFFFFF" />
+  <g opacity="0.35">
+    <circle cx="150" cy="80" r="60" fill="#22c55e" />
+    <circle cx="340" cy="230" r="40" fill="#0ea5e9" />
+    <circle cx="980" cy="160" r="70" fill="#f59e0b" />
+  </g>
+  <polyline points="0,220 60,210 140,190 220,195 300,180 380,200 460,170 540,185 620,160 700,175 780,150 860,165 940,140 1020,150 1100,135 1200,140" fill="none" stroke="url(#grad1)" stroke-width="6" stroke-linecap="round" />
+  <polyline points="0,250 60,240 140,230 220,235 300,215 380,225 460,205 540,215 620,200 700,210 780,190 860,200 940,185 1020,190 1100,175 1200,180" fill="none" stroke="url(#grad2)" stroke-width="6" stroke-linecap="round" />
+</svg>

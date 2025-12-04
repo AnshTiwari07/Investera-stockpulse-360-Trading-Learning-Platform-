@@ -10,12 +10,14 @@ import {
   TableContainer, 
   TableHead, 
   TableRow, 
-  CircularProgress, 
-  Box 
+  Box,
+  Alert
 } from '@mui/material';
 
 const Portfolio = () => {
   const [portfolio, setPortfolio] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPortfolio = async () => {
@@ -23,20 +25,23 @@ const Portfolio = () => {
         const res = await api.get('/portfolio');
         setPortfolio(res.data);
       } catch (err) {
-        console.error(err);
+        console.error('Failed to load portfolio', err);
+        setError('Failed to load portfolio. Please try again.');
+      } finally {
+        setLoading(false);
       }
     };
     fetchPortfolio();
   }, []);
-
-  if (!portfolio) return <div className="shimmer" style={{ height: 40, width: 140, borderRadius: 8 }} />;
+  if (loading) return <div className="shimmer" style={{ height: 40, width: 140, borderRadius: 8 }} />;
 
   return (
-    <Container maxWidth="lg">
-      <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'common.white' }}>
-        My Portfolio
-      </Typography>
-      <Typography variant="h6" gutterBottom sx={{ color: 'common.white' }}>Balance: ₹ {portfolio.balance ?? '—'}</Typography>
+  <Container maxWidth="lg">
+    <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'common.white' }}>
+      My Portfolio
+    </Typography>
+    {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+    <Typography variant="h6" gutterBottom sx={{ color: 'common.white' }}>Balance: ₹ {portfolio.balance ?? '—'}</Typography>
       
       <TableContainer component={Paper} className="card-scale-in" sx={{ mt: 3, boxShadow: '0 10px 24px rgba(0,0,0,0.25)', backgroundColor: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(8px)' }}>
         <Table sx={{ '& td': { color: 'common.white' } }}>
@@ -52,7 +57,14 @@ const Portfolio = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {portfolio.holdings.map((h) => (
+            {(!portfolio.holdings || portfolio.holdings.length === 0) && (
+              <TableRow>
+                <TableCell colSpan={7} align="center" sx={{ color: 'common.white' }}>
+                  No holdings yet. Place orders to build your portfolio.
+                </TableCell>
+              </TableRow>
+            )}
+            {portfolio.holdings?.map((h) => (
               <TableRow key={h.symbol} hover className="hover-raise">
                 <TableCell>{h.symbol}</TableCell>
                 <TableCell>{h.quantity}</TableCell>

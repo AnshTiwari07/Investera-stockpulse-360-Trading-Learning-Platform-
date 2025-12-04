@@ -5,6 +5,8 @@ const User = require('../models/User');
 const Stock = require('../models/Stock');
 const Portfolio = require('../models/Portfolio');
 const Order = require('../models/Order');
+const Transaction = require('../models/Transaction');
+const { getLatestPrice } = require('../services/pricing');
 
 // GET /api/orders - list current user's orders
 router.get('/', auth, async (req, res) => {
@@ -22,6 +24,8 @@ router.post('/place', auth, async (req, res) => {
   try {
     const { symbol, quantity, orderType, price } = req.body;
 
+    console.log('[ORDERS] Place request:', { symbol, quantity, orderType, price });
+
     if (!symbol || !quantity || !orderType) {
       return res.status(400).json({ msg: 'Missing required fields' });
     }
@@ -32,8 +36,11 @@ router.post('/place', auth, async (req, res) => {
     const stock = await Stock.findOne({ symbol: symbol.toUpperCase() });
     if (!stock) return res.status(404).json({ msg: 'Stock not found' });
 
-    const executionPrice = price ? Number(price) : stock.currentPrice;
+    // Use explicit price if provided; otherwise fetch latest to avoid stale equality
+    const priceSource = price ? 'explicit' : 'pricing_service';
+    const executionPrice = price ? Number(price) : await getLatestPrice(stock.symbol);
     const totalAmount = Number((executionPrice * q).toFixed(2));
+    console.log('[ORDERS] Computed executionPrice and totalAmount:', { executionPrice, totalAmount, priceSource });
 
     const user = await User.findById(req.user.id);
     let portfolio = await Portfolio.findOne({ user: req.user.id });
@@ -65,15 +72,97 @@ router.post('/place', auth, async (req, res) => {
         h.quantity = newQty;
         h.averageBuyPrice = newAvg;
       }
+      // Mark remaining quantity for FIFO pairing
+      var remainingQtyForOrder = q;
     } else if (orderType === 'SELL') {
       if (holdingIndex === -1 || portfolio.holdings[holdingIndex].quantity < q) {
         return res.status(400).json({ msg: 'Not enough quantity to sell' });
       }
 
       const h = portfolio.holdings[holdingIndex];
-      // Realized profit/loss from this sell
-      const realized = Number(((executionPrice - h.averageBuyPrice) * q).toFixed(2));
-      portfolio.realizedProfitLoss = Number(((portfolio.realizedProfitLoss || 0) + realized).toFixed(2));
+      // Allocate sell quantity across FIFO BUY orders and record transactions
+      let remainingToSell = q;
+      let realizedFromThisSell = 0;
+      const buyOrders = await Order.find({
+        user: req.user.id,
+        symbol: stock.symbol,
+        orderType: 'BUY',
+        status: 'COMPLETED'
+      }).sort({ createdAt: 1 });
+
+      for (const bo of buyOrders) {
+        const available = typeof bo.remainingQuantity === 'number' ? bo.remainingQuantity : bo.quantity;
+        if (available <= 0) continue;
+        if (remainingToSell <= 0) break;
+        const alloc = Math.min(available, remainingToSell);
+
+        // Validation: positive numeric values
+        if (alloc <= 0 || executionPrice <= 0 || bo.price <= 0) {
+          return res.status(400).json({ msg: 'Invalid numeric values for transaction' });
+        }
+
+        // Chronological validation: sell date must be >= buy date
+        const sellDate = new Date();
+        if (sellDate < bo.createdAt) {
+          return res.status(400).json({ msg: 'Sell date must be after buy date' });
+        }
+
+        // Prevent implicit reuse: if no explicit price and exec equals buy price, refresh once
+        let effectiveSellPrice = executionPrice;
+        if (!price && Number(effectiveSellPrice.toFixed(2)) === Number(bo.price.toFixed(2))) {
+          effectiveSellPrice = await getLatestPrice(stock.symbol);
+          console.log('[ORDERS] Refreshed sell price to avoid stale equality:', {
+            symbol: stock.symbol,
+            previousSellPrice: executionPrice,
+            refreshedSellPrice: effectiveSellPrice,
+          });
+        }
+
+        const buyAmount = Number((bo.price * alloc).toFixed(2));
+        const sellAmount = Number((effectiveSellPrice * alloc).toFixed(2));
+        const pl = Number((sellAmount - buyAmount).toFixed(2));
+        const classification = pl > 0 ? 'PROFIT' : pl < 0 ? 'LOSS' : 'BREAKEVEN';
+
+        const txn = new Transaction({
+          user: req.user.id,
+          symbol: stock.symbol,
+          buyPrice: bo.price,
+          buyQuantity: alloc,
+          buyAmount,
+          buyDate: bo.executedAt || bo.createdAt,
+          sellPrice: effectiveSellPrice,
+          sellQuantity: alloc,
+          sellAmount,
+          sellDate,
+          profitLoss: pl,
+          classification
+        });
+        await txn.save();
+
+        console.log('[ORDERS] FIFO allocation ->', {
+          symbol: stock.symbol,
+          alloc,
+          buyPrice: bo.price,
+          sellPrice: effectiveSellPrice,
+          buyAmount,
+          sellAmount,
+          profitLoss: pl,
+          classification,
+        });
+
+        bo.remainingQuantity = Number((available - alloc).toFixed(0));
+        await bo.save();
+
+        realizedFromThisSell = Number((realizedFromThisSell + pl).toFixed(2));
+        remainingToSell -= alloc;
+      }
+
+      // If we couldn't allocate full sell against buys, fail
+      if (remainingToSell > 0) {
+        return res.status(400).json({ msg: 'Selling quantity exceeds purchased quantity (FIFO allocation failed)' });
+      }
+
+      portfolio.realizedProfitLoss = Number(((portfolio.realizedProfitLoss || 0) + realizedFromThisSell).toFixed(2));
       h.quantity -= q;
       user.balance = Number((user.balance + totalAmount).toFixed(2));
 
@@ -96,9 +185,23 @@ router.post('/place', auth, async (req, res) => {
       executedAt: new Date()
     });
 
+    // Set remainingQuantity for BUY orders
+    if (orderType === 'BUY') {
+      order.remainingQuantity = remainingQtyForOrder;
+    }
+
     await order.save();
     await user.save();
     await portfolio.save();
+
+    console.log('[ORDERS] Order executed:', {
+      id: order._id.toString(),
+      symbol: order.symbol,
+      orderType: order.orderType,
+      quantity: order.quantity,
+      price: order.price,
+      totalAmount: order.totalAmount,
+    });
 
     res.json({ msg: 'Order executed', order });
   } catch (err) {

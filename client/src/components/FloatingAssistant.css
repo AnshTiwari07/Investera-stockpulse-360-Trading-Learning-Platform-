@@ -1,0 +1,48 @@
+/* Fixed assistant icon button */
+.assistant-fab {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1f2937 0%, #0f172a 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  cursor: pointer;
+  z-index: 9999;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  outline: none;
+}
+
+.assistant-fab:hover,
+.assistant-fab:focus-visible {
+  transform: translateY(-1px) scale(1.06);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.35);
+  background: linear-gradient(135deg, #0f172a 0%, #1f2937 100%);
+}
+
+.assistant-fab:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.assistant-fab .assistant-icon {
+  width: 22px;
+  height: 22px;
+}
+
+/* Slightly larger on medium+ screens */
+@media (min-width: 768px) {
+  .assistant-fab {
+    width: 46px;
+    height: 46px;
+  }
+  .assistant-fab .assistant-icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+

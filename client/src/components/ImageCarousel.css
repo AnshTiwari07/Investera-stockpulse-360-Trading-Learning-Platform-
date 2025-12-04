@@ -1,0 +1,53 @@
+.carousel {
+  position: relative;
+  width: 100%;
+  height: clamp(180px, 28vw, 320px);
+  overflow: hidden;
+  border-radius: 16px;
+  background: #FFFFFF; /* match hero */
+}
+.carousel-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+  transition: transform 600ms ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .carousel-track { transition: none; }
+}
+.carousel-slide { flex: 0 0 100%; height: 100%; }
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background-color: #FFFFFF;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(0,0,0,0.1);
+  color: #0b1220;
+  width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center;
+  cursor: pointer;
+  transition: background 200ms ease;
+}
+.carousel-arrow:hover { background: rgba(255,255,255,1); }
+.carousel-arrow.left { left: 10px; }
+.carousel-arrow.right { right: 10px; }
+
+.carousel-dots {
+  position: absolute; left: 0; right: 0; bottom: 10px;
+  display: flex; justify-content: center; gap: 6px;
+}
+.dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(0,0,0,0.25);
+  border: none; cursor: pointer;
+}
+.dot.active { background: #4caf50; }
+

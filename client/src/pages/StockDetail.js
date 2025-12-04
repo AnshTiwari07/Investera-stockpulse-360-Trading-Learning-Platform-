@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api';
 import axios from 'axios';
 import StockChart from '../components/StockChart';
 import LiveChart from '../components/LiveChart';
+import { VoiceContext } from '../context/VoiceContext';
 
 const imageMap = {
   'reliance.png': require('../images/reliance.png'),
@@ -16,36 +17,64 @@ const imageMap = {
 
 const StockDetail = () => {
   const { symbol } = useParams();
+  const { speak } = useContext(VoiceContext);
   const [stock, setStock] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState(null);
   const [history, setHistory] = useState([]);
+  const [loadingStock, setLoadingStock] = useState(true);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [error, setError] = useState(null);
   const [showChart, setShowChart] = useState(false);
   const [showSplash, setShowSplash] = useState(false);
   const [splashText, setSplashText] = useState('');
   const [liveData, setLiveData] = useState([]);
+  const historyControllerRef = useRef(null);
 
   const fetchStock = async () => {
     try {
       const res = await api.get(`/stocks/${symbol}`);
       setStock(res.data);
     } catch (err) {
-      console.error(err);
+      console.error('Failed to load stock', err);
+      setError('Failed to load stock details. Please try again.');
+    } finally {
+      setLoadingStock(false);
     }
   };
 
   const fetchHistory = async () => {
     try {
-      const res = await axios.get(`/api/stocks/${symbol}/history?range=1M`);
-      setHistory(res.data.history);
+      // Abort previous inflight request if symbol changes quickly
+      if (historyControllerRef.current) {
+        try { historyControllerRef.current.abort(); } catch (_) {}
+      }
+      const controller = new AbortController();
+      historyControllerRef.current = controller;
+      const res = await axios.get(`/api/stocks/${symbol}/history?range=1M`, { signal: controller.signal });
+      const hist = res.data?.history || (Array.isArray(res.data) ? res.data : []);
+      setHistory(hist);
     } catch (err) {
-      console.error(err);
+      if (err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError') {
+        // swallow cancellation
+      } else {
+        console.error('Failed to load history', err);
+      }
+    } finally {
+      setLoadingHistory(false);
     }
   };
 
   useEffect(() => { 
     fetchStock();
     fetchHistory();
+    return () => {
+      // Cleanup inflight history request when leaving page
+      if (historyControllerRef.current) {
+        try { historyControllerRef.current.abort(); } catch (_) {}
+        historyControllerRef.current = null;
+      }
+    };
   }, [symbol]);
 
   // Live per-second price simulation and chart updates
@@ -78,23 +107,35 @@ const StockDetail = () => {
       if (orderType === 'BUY') {
         setSplashText(`Congratulations for buying "${stock?.name || symbol}"`);
       } else if (orderType === 'SELL') {
-        setSplashText('THANKS');
+        setSplashText(`Nice decision selling "${stock?.name || symbol}"`);
       } else {
         setSplashText('Order placed');
       }
       setShowSplash(true);
       setTimeout(() => setShowSplash(false), 3000);
+      // Voice confirmation with small delay
+      setTimeout(() => {
+        try {
+          if (orderType === 'BUY') {
+            speak(`Congratulation You are buying ${stock?.name || symbol}`, { volume: 0.6 });
+          } else if (orderType === 'SELL') {
+            speak(`Nice decision selling ${stock?.name || symbol}`, { volume: 0.6 });
+          }
+        } catch {}
+      }, 250);
     } catch (err) {
       setMessage('Order failed');
     }
   };
 
-  if (!stock) return <div className="loading">Loading stock...</div>;
+  if (loadingStock) return <div className="shimmer" style={{ height: 40, width: 200, borderRadius: 8 }} />;
+  if (!stock) return <div className="loading">Unable to load stock.</div>;
   // Resolve logo source with safe fallback
   const logoSrc = imageMap[(stock.logo || 'investara.png').toLowerCase()] || imageMap['investara.png'];
 
   return (
     <section className="container" style={{ padding: '2rem 0' }}>
+      {error && <p style={{ color: 'salmon', marginBottom: '1rem' }}>{error}</p>}
       {showSplash && (
         <div className="overlay-fade" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1300 }}>
           <div className="card-scale-in" style={{ background: '#fff', color: '#111', padding: '2rem 3rem', borderRadius: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}>
@@ -116,9 +157,15 @@ const StockDetail = () => {
         <button className="btn btn-light" onClick={() => setShowChart(!showChart)}>
           {showChart ? 'Hide Chart' : 'View Chart'}
         </button>
+        {showChart && loadingHistory && <div className="shimmer" style={{ height: 80, borderRadius: 8 }} />}
         {showChart && history && history.length > 0 && (
           <div style={{ marginTop: '1rem' }}>
             <StockChart data={history} />
+          </div>
+        )}
+        {showChart && (!history || history.length === 0) && !loadingHistory && (
+          <div style={{ marginTop: '1rem', color: 'white' }}>
+            No historical data available.
           </div>
         )}
         {showChart && (

@@ -24,6 +24,11 @@ const OrderSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  // For BUY orders, this tracks how much quantity remains to be paired
+  // with future SELL transactions (used for FIFO transaction recording)
+  remainingQuantity: {
+    type: Number
+  },
   price: {
     type: Number,
     required: true

@@ -15,7 +15,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.9.3"
+    "nodemailer": "^6.9.3",
+    "axios": "^1.6.8"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

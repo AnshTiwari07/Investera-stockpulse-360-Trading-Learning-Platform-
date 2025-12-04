@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { AppBar, Toolbar, Typography, Button, Box, Link } from '@mui/material';
-import investaraLogo from '../../images/investara.png';
+import appLogo from '../../images/investara.png';
 // logo intentionally removed from navbar to simplify header
 
 const Navbar = () => {
@@ -19,15 +19,14 @@ const Navbar = () => {
       <Toolbar>
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
           <Link component={RouterLink} to="/" color="inherit" underline="none" sx={{ display: 'flex', alignItems: 'center' }} className="nav-link" aria-label="Homepage">
-            <span className="nav-logo" aria-hidden="true">
-              <img
-                className="brand-img"
-                src={process.env.PUBLIC_URL + '/image.png'}
-                alt="Investara logo"
-                onError={(e) => { e.target.onerror = null; e.target.src = investaraLogo; }}
-              />
-            </span>
-            <Typography variant="h6" component="span" sx={{ ml: 0, fontWeight: 700, letterSpacing: 0.3 }}>Investara</Typography>
+            {/* New circular logo image */}
+            <img
+              className="nav-logo-img"
+              src={`${process.env.REACT_APP_API_ORIGIN || 'http://localhost:5000'}/uploads/profile-pics/1764756204886-300513765.png`}
+              alt="Investara logo"
+              onError={(e) => { e.currentTarget.src = appLogo; }}
+            />
+            <Typography variant="h6" component="span" sx={{ fontWeight: 700, letterSpacing: 0.3, ml: 1 }}>Investara</Typography>
           </Link>
         </Box>
         <Box>
@@ -36,6 +35,7 @@ const Navbar = () => {
               <Button color="inherit" component={RouterLink} to="/" className="nav-link" sx={{ mx: 0.5 }}>Dashboard</Button>
               <Button color="inherit" component={RouterLink} to="/portfolio" className="nav-link" sx={{ mx: 0.5 }}>Portfolio</Button>
               <Button color="inherit" component={RouterLink} to="/orders" className="nav-link" sx={{ mx: 0.5 }}>Orders</Button>
+              <Button color="inherit" component={RouterLink} to="/transactions" className="nav-link" sx={{ mx: 0.5 }}>Transactions</Button>
               <Button color="inherit" component={RouterLink} to="/calculator" className="nav-link" sx={{ mx: 0.5 }}>Calculator</Button>
               <Button color="inherit" onClick={onLogout} className="nav-link" sx={{ mx: 0.5 }}>Logout ({user?.name})</Button>
             </>
